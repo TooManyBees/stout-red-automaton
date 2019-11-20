@@ -66,22 +66,25 @@ impl Kernel for Kernel2D {}
 pub struct Automata {
 	size: usize,
 	generations: Vec<Vec<bool>>,
+	f: fn(u8) -> bool,
 
 }
 
 impl Automata {
-	pub fn new(size: usize) -> Self {
+	pub fn new(size: usize, f: fn(u8) -> bool) -> Self {
 		Automata {
 			size,
 			generations: vec![],
+			f,
 		}
 	}
 
-	pub fn with_seed(size: usize, seed: Vec<bool>) -> Self {
+	pub fn with_seed(size: usize, f: fn(u8) -> bool, seed: Vec<bool>) -> Self {
 		assert!(seed.len() == size, "Seed generation does not match size of the automata's space");
 		Automata {
 			size,
 			generations: vec![seed],
+			f,
 		}
 	}
 
@@ -93,17 +96,7 @@ impl Automata {
 		self.generations.last().map(|old_generation| {
 			(0..self.size).map(|x| {
 				let kernel = Kernel1D::new(x, self.size);
-				match kernel.eval(&old_generation) {
-					0b111 => false,
-					0b110 => false,
-					0b101 => false,
-					0b100 => true,
-					0b011 => true,
-					0b010 => true,
-					0b001 => true,
-					0b000 => false,
-					_ => false,
-				}
+				(self.f)(kernel.eval(&old_generation))
 			}).collect()
 		}).unwrap_or_else(|| {
 			let mut rng = rand::thread_rng();

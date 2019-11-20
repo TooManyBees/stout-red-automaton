@@ -20,7 +20,19 @@ fn model(app: &App) -> Model {
 //    app.set_loop_mode(LoopMode::loop_ntimes(size as usize));
 	app.set_loop_mode(LoopMode::loop_once());
 	Model {
-		automata: Automata::new(size as usize),
+		automata: Automata::new(size as usize, |m| {
+			match m {
+				0b111 => false,
+				0b110 => false,
+				0b101 => false,
+				0b100 => true,
+				0b011 => true,
+				0b010 => true,
+				0b001 => true,
+				0b000 => false,
+				_ => false,
+			}
+		}),
 	}
 }
 
